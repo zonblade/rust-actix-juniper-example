@@ -1,4 +1,4 @@
 mod gql;
-mod resolver;
+pub mod resolver;
 pub mod route;
 mod services;

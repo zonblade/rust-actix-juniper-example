@@ -1,6 +1,3 @@
-pub mod create;
-pub mod delete;
-pub mod detail;
-pub mod list;
+pub mod example;
 
-pub struct ServiceUsers;
+pub struct ServiceExample;

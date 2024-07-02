@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, sync::Arc};
 
 use actix_web::{web, App, HttpServer};
 use config::Config;
@@ -10,7 +10,7 @@ pub mod restapi;
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
-    std::env::set_var("RUST_LOG", "warn");
+    std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
     config::init();
 
@@ -19,16 +19,19 @@ async fn main() -> io::Result<()> {
         .await
         .expect("Database Failed to Connect");
 
+    let schema_example = Arc::new(modules::users::resolver::schema());
+
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(db_client.clone()))
             .service(web::resource("/playground")
-                .route(web::get().to(restapi::playground::graphql_playground)
+                .route(web::get().to(restapi::playground::graphql_playground),
             ))
             .service(web::scope("/gql")
                 .service(web::resource("/contoh")
-                    .route(web::post().to(modules::users::route::graphql))
-                )
+                    .app_data(web::Data::from(schema_example.clone()))    
+                    .route(web::post().to(modules::users::route::graphql)),
+                ),
             )
     })
     .workers(4)
