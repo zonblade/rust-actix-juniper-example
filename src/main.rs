@@ -22,6 +22,9 @@ async fn main() -> io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(db_client.clone()))
+            .service(web::resource("/playground")
+                .route(web::get().to(restapi::playground::graphql_playground)
+            ))
             .service(web::scope("/gql")
                 .service(web::resource("/contoh")
                     .route(web::post().to(modules::users::route::graphql))
